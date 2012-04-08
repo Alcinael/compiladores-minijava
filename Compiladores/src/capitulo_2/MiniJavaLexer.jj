@@ -1,0 +1,76 @@
+options {
+  JAVA_UNICODE_ESCAPE = true;
+}
+
+PARSER_BEGIN(MiniJavaLexer)
+  public class MiniJavaLexer {}
+PARSER_END(MiniJavaLexer)
+
+
+SKIP: 
+{
+  " "
+| "\n"
+| "\t"
+| "\r"  
+}
+
+TOKEN:
+{
+  < CLASS: "class" >
+| < LKEY: "{" >
+| < PUBLIC: "public" >
+| < STATIC: "static" >
+| < VOID: "void" >
+| < MAIN: "main" >
+| < LPARENT: "(" >
+| < STRING: "String" >
+| < LBRACE: "[" >
+| < RBRACE: "]" >
+| < RPARENT: ")" >
+| < RKEY: "}" >
+| < EXTENDS: "extends" >
+| < SEMI: ";" >
+| < RETURN: "return" >
+| < COMMA: "," >
+| < INT: "int" >
+| < BOOLEAN: "boolean" >
+| < EQ: "=" >
+| < IF: "if" >
+| < ELSE: "else" >
+| < WHILE: "while" >
+| < PRINT: "System.out.println" >
+| < AND: "&&" >
+| < LESS: "<" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < TIMES: "*" >
+| < DOT: "." >
+| < LENGTH: "length" >
+| < TRUE: "true" >
+| < FALSE: "false" >
+| < THIS: "this" >
+| < NEW: "new" >
+| < EXCL: "!" >
+| < IDENTIFIER: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9"] )* >  
+| < INTEGER_LITERAL: ( ["0"-"9"] )+ >
+}
+
+
+void Goal() :
+{}
+{
+  ( MiniJavaToken() )*
+  <EOF>
+}
+
+void MiniJavaToken():
+{}
+{
+  "class"  |  <IDENTIFIER> | "{" | "public" | "static" | "void" |
+  "main" | "(" | "String"  | "[" | "]" | ")" | "}" | "extends" | ";"
+  | "return" | "," | "int" | "boolean" | "=" | "if" | "else" | "while"
+  | "System.out.println" | "&&" | "<" | "+" | "-" | "*" | "." |
+  "length" | <INTEGER_LITERAL> | "true" | "false" | "this" | "new" |
+  "!"
+}
