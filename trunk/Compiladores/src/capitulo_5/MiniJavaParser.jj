@@ -1,0 +1,439 @@
+
+options
+{
+  JDK_VERSION = "1.5";
+  static = true;
+}
+
+PARSER_BEGIN(MiniJavaParser)
+
+package capitulo_5;
+
+import syntaxtree.*;
+import visitor.*;
+
+public class MiniJavaParser
+{
+  public static void main(String args []) throws ParseException
+  {
+    try    {
+		Program root = new MiniJavaParser(System.in).Goal();
+		System.out.println("A analise sintatica foi realizada com sucesso");
+		root.accept(new PrettyPrintVisitor());          }catch(ParseException e)    {
+    	System.out.println(e.toString());     }
+   }
+}
+
+PARSER_END(MiniJavaParser)
+
+SKIP :
+{
+  <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+| <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+|  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : /* OPERATORS */
+{
+  < PLUS : "+" >
+| < MINUS : "-" >
+| < TIMES : "*" >
+| < LAND : "&&" >
+| < LE : "< " >
+| < NOT : "!" >
+}
+
+TOKEN :
+{
+  < INTEGER_LITERAL : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+| < STRING : "String" >
+| < CLASS : "class" >
+| < PUBLIC: "public" >
+| < STATIC : "static" >
+| < VOID : "void" >
+| < MAIN : "main" >
+| < EXTENDS : "extends" >
+| < RETURN : "return" >
+| < INT : "int" >
+| < BOOLEAN : "boolean" >
+| < IF : "if" >
+| < ELSE : "else" >
+| < WHILE : "while" >
+| < PRINT : "System.out.println" >
+| < LENGTH : "length" >
+| < TRUE : "true" >
+| < FALSE : "false" >
+| < THIS : "this" >
+| < NEW : "new" >
+| < LPAREN : "(" >
+| < RPAREN : ")" >
+| < SEMI : ";" >
+| < LKEY: "{" >
+| < RKEY: "}" >
+| < LBRACKET : "[" >
+| < RBRACKET : "]" >
+| < DOT : "." >
+| < COMMA: "," >
+| < GETS: "=" >
+| < ID : ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9"] )*>
+}
+
+Program Goal():
+{
+	MainClass m = null;
+	ClassDeclList cl = new ClassDeclList();
+}
+{
+	{		return Program(m, cl);
+	}	
+}
+
+Program Program(MainClass m, ClassDeclList cl):
+{
+  ClassDecl c;
+}
+{
+	(	  m = MainClass(null, null, null)
+	)
+	(
+	  c = ClassDecl(null, null, null)
+	  {
+	    cl.addElement(c);  	  }
+	)*
+	{
+		return new Program(m, cl);
+	}
+	
+}
+MainClass MainClass(Identifier i1, Identifier i2, Statement s):{
+	Token t1, t2;
+}{	< CLASS >	(
+	   t1 = < ID >
+	   {	     i1 = new Identifier(t1.toString());	   }	   	)	 < LKEY > < PUBLIC > < STATIC > < VOID > < MAIN > < LPAREN > < STRING > <LBRACKET > < RBRACKET>
+	 (	   t2 = < ID >
+	   {		 i2 = new Identifier(t2.toString());
+	   }
+	 )
+	   < RPAREN > < LKEY>	   (	     	     s = Statement()	   )	   < RKEY> < RKEY>
+	   {			return new MainClass(i1, i2, s);
+	   }}ClassDecl ClassDecl(Identifier i1, VarDeclList vl, MethodDeclList ml):{
+  Identifier i2;
+  Token t, t1;
+  VarDecl v;
+  MethodDecl m;
+}{	LOOKAHEAD(3) < CLASS >
+	(
+	  t = <ID>
+	  {
+	    i1 = new Identifier(t.toString());	  }
+	) <LKEY>
+	(
+	  v = VarDecl(null, null)
+	  {
+	    vl.addElement(v);	  }
+	)*
+	(
+	  m = MethodDecl(null, null, null, null, null, null)
+	  {
+	    ml.addElement(m);	  }
+	)* <RKEY>
+	{
+	  return new ClassDeclSimple(i1, vl, ml);	}|	< CLASS >
+	(
+	  t = <ID>
+	  {
+	    i1 = new Identifier(t.toString());	  }
+	)<EXTENDS>
+	(	  t1 = <ID>
+	  {
+	    i2 = new Identifier(t1.toString());	  }
+	) <LKEY>
+	(
+	  v = VarDecl(null, null)
+	  {
+	    vl.addElement(v);	  }
+	)*
+	(
+	  m = MethodDecl(null, null, null, null, null, null)
+	  {
+	    ml.addElement(m);	  }
+	)* <RKEY>
+	{
+	  return new ClassDeclExtends(i1, i2, vl, ml);	}}
+
+MethodDecl MethodDecl(Type t, Identifier i, FormalList fl, VarDeclList vl, StatementList sl, Exp e):{
+  Token tk;
+  VarDecl v;
+  Statement s;
+}{	<PUBLIC>
+	(	  t = Type()
+	)
+	(	  tk = <ID>
+	  {
+	    i = new Identifier(tk.toString());	  }
+	) <LPAREN>
+	(	  fl = FormalList()
+	) <RPAREN> <LKEY>
+	(LOOKAHEAD(2)		  v = VarDecl(null, null)
+	  {
+	    vl.addElement(v);	  }
+	)*
+	(
+	  s = Statement()
+	  {
+	    sl.addElement(s);	  }
+	)* <RETURN>
+	(	  e = Exp()
+	) <SEMI> <RKEY>
+	{
+	  return new MethodDecl(t, i, fl, vl, sl, e);	}}
+
+FormalList FormalList():{
+  Type t;
+  Token tk;
+  Identifier i;
+  Formal f;
+  FormalList fl = new FormalList();
+}{	(	  t = Type()
+	)
+	(	  tk = < ID >
+	  {
+	    i = new Identifier(tk.toString());	  }
+	)
+	{
+	  f = new Formal(t, i);
+	  fl.addElement(f);	} (FormalRest(fl))*
+	{
+	  return fl;	}}FormalList FormalRest(FormalList fl):{
+  Type t;
+  Token tk;
+  Identifier i;
+  Formal f;
+}{	< COMMA >
+	(	  t = Type()
+	)
+	(	  tk = < ID >
+	  {  
+	  	i = new Identifier(tk.toString());
+	  }
+	)
+	{
+	  f = new Formal(t, i);
+	  fl.addElement(f);
+	}
+	{
+	  return fl;	}}
+
+Statement Statement():{
+	Token t;
+	Exp e1, e2;
+	Statement s1, s2;
+	StatementList sl = new StatementList();
+}{< LKEY >
+(
+  s1 = Statement()
+  {
+    sl.addElement(s1);    }
+  {
+    return new Block(sl);  }
+)* < RKEY >
+| < IF> <LPAREN >
+(  e1 = Exp()
+) < RPAREN >
+(
+  s1 = Statement()
+) < ELSE >
+(
+  s2 = Statement()
+){
+	return new If(e1, s1, s2); }| < WHILE > <LPAREN >
+(  e1 = Exp()
+) <RPAREN >
+(
+  s1 = Statement()
+)
+{
+	return new While(e1, s1);}| < PRINT > < LPAREN>
+(  e1 = Exp()
+) < RPAREN > < SEMI >
+{
+	return new Print(e1);}| LOOKAHEAD(2)(  t = < ID >
+  {
+	Identifier i = new Identifier(t.toString());   }
+)  <GETS >
+(  e1 = Exp()
+) < SEMI >
+{
+	return new Assign(i, e1);}|
+(  t = < ID >
+  {
+	Identifier i = new Identifier(t.toString());      }
+)< LBRACKET>
+(  e1 = Exp()
+) <RBRACKET> <GETS >
+(  e2 = Exp()
+) < SEMI >
+{
+	return new ArrayAssign(i, e1, e2);}}
+
+VarDecl VarDecl(Type t, Identifier i):{
+  Token t1;
+}{	(	  t = Type()
+	)
+	(
+	  t1 = < ID >
+	  {	    
+	    i = new Identifier(t1.toString());
+	  }
+	) < SEMI >
+	{
+	  return new VarDecl(t, i);	}}
+
+Exp Exp():{
+  Exp e;
+}{	  {System.out.println("\tTry: E --> T R|vazio"); }
+  (    e = T()
+  ) [R(e)] {System.out.println("Exp --> T R|vazio");}
+  {
+    return e;   }
+| {System.out.println("\tTry: E --> new K"); } < NEW >
+(  e = K(null)
+){System.out.println("E --> new K");}
+{
+  return e;}
+| {System.out.println("\tTry: E --> not E"); } < NOT >
+(  e = Exp()
+){System.out.println("Exp --> not E");}{
+  return new Not(e);}
+| {System.out.println("\tTry: E --> ( E )"); } < LPAREN>
+(  e = Exp()
+) < RPAREN> [R(e)]{System.out.println("Exp --> ( E )");}
+{
+  return e;}
+}
+Type Type():{
+  Token t;
+}{	< BOOLEAN >
+	{
+	  return new BooleanType();	}|
+	(	  t = < ID >
+	)
+	{
+		return new IdentifierType(t.toString());	  	}| LOOKAHEAD(2) < INT >
+	{
+		return new IntegerType();	}
+| < INT > < LBRACKET> < RBRACKET >
+	{
+		return new IntArrayType();	}	}
+
+Exp T():{	Token t1;}{	{System.out.println("\tTry: T -- > TRUE");}
+	(
+	  t1 = <TRUE>
+	  {
+	    return new True();	  }
+    ){System.out.println("T --> TRUE("+t1+")");}| {System.out.println("\tTry: T -- > FALSE");}
+(  t1 = < FALSE >
+  {
+    return new False();  }
+){System.out.println("T --> FALSE(" +t1 + ")");}| {System.out.println("\tTry: T -- > ID");}
+(  t1 = < ID >
+  {
+    return new IdentifierExp(t1.toString());  }
+){System.out.println("T --> ID(" +t1 + ")");}	| {System.out.println("\tTry: T -- > THIS");}
+(  t1 = < THIS >
+  {
+    return new This();  }
+){System.out.println("T --> THIS(" +t1 + ")");}| {System.out.println("\tTry: T -- > INTEGER_LITERAL");}
+(  t1 = < INTEGER_LITERAL >
+  {
+	return new IntegerLiteral(Integer.parseInt(t1.toString()));    }
+){System.out.println("T --> INTEGER_LITERAL(" +t1 + ")");}}Exp K(Exp e):{
+  Token t;
+  ExpList el;
+}{    LOOKAHEAD(2) {System.out.println("\tTry: . id [ ExpList ]");} < DOT >
+    (
+      t = < ID >
+    ) < LPAREN>
+    (
+      el = ExpList()
+    ) < RPAREN>{System.out.println("K -- > . id [ ExpList ]");}{
+  return new Call(e, new Identifier(t.toString()), el);}
+| {System.out.println("\tTry: K --> ID (__)"); }
+(
+  t = < ID >
+) < LPAREN > < RPAREN > [K(new IdentifierExp(t.toString()))] {System.out.println("K --> ID (__)");}
+{
+  return new IdentifierExp(t.toString());}| {System.out.println("\tTry: K --> int [ E ]");} < INT > < LBRACKET >
+(
+  e = Exp()
+) < RBRACKET >{System.out.println("K -- > int [ E ]");}{
+  return new NewArray(e);}
+| {System.out.println("\tTry: K -- > . length ");}< DOT > < LENGTH >{System.out.println("K -- > . length ");}{
+  return new ArrayLength(e);}
+}Exp R(Exp e):{
+  Exp e1 = null;
+}{  {System.out.println("\tTry: R --> Op E"); } Op(e, e1)
+  (    e1 = Exp()
+  ) {System.out.println("R - > Op E");}
+  {
+    return Op(e, e1);  }
+| {System.out.println("\tTry: R --> K"); }
+  (
+    e = K(null)
+  ) {System.out.println("R - > K");}  {
+    return e;   }
+| {System.out.println("\tTry: R -- > [E] L"); } < LBRACKET >
+  (    e1 = Exp()
+  ) < RBRACKET> [L(e)] {System.out.println("R --> [ E ] L");}  {
+    return new NewArray(e);  }
+}
+
+ArrayLookup L(Exp e):
+{
+  Exp e1;
+}
+{
+	{System.out.println("\tTry:L -- > [E] L|vazio "); } < LBRACKET >
+	(	  e1 = Exp()
+	) < RBRACKET > [L(e)] {System.out.println("R - > K");}
+	{
+	  return new ArrayLookup(e, e1);	}
+}
+
+ExpList ExpList():{
+  Exp e;
+  ExpList el = new ExpList();
+}{	(	  e = Exp()
+		{
+			el.addElement(e);
+		}
+	) (ExpRest(el))* {System.out.println("ExpList --> E ExpRest*");}
+	{
+	  return el;	}
+}
+
+ExpList ExpRest(ExpList el):{
+  Exp e;
+}{	< COMMA > (e = Exp()) {System.out.println("ExpRest --> , E");}
+	{
+	  el.addElement(e);	}
+	{
+	  return el;	}
+}
+
+Exp Op(Exp e, Exp e1):{	Token t;}{
+	{System.out.println("\tTry: Op - > Plus");} t = < PLUS >{System.out.print("Op --> Plus");System.out.println("("+t+")");}
+	{
+	  return new Plus(e, e1);	}| 	{System.out.println("\tTry: Op - > Minus");} t = < MINUS >{System.out.print("Op --> Minus");System.out.println("("+t+")");}	{
+	  return new Minus(e, e1);	}
+|	{System.out.println("\tTry: Op - > Times");} t = < TIMES >{System.out.print("Op --> Times");System.out.println("("+t+")");}	{
+	  return new Times(e, e1);	}
+| 	{System.out.println("\tTry: Op -- > Land");}  t = <  LAND >{System.out.print("Op --> Land");System.out.println("("+t+")");}	{
+	  return new And(e, e1);	}
+| 	{System.out.println("\tTry: Op -- > Less than");} t = < LE >{System.out.print("Op --> Less than");System.out.println("("+t+")");}	{
+	  return new LessThan(e, e1);	}
+}
