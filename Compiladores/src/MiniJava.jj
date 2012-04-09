@@ -1,0 +1,229 @@
+
+ 
+options
+{
+  JDK_VERSION = "1.5";
+  static = true;
+}
+
+PARSER_BEGIN(eg1)
+
+public class eg1
+{
+  public static void main(String args []) throws ParseException
+  {
+    System.out.println("Testing Start! \n Enter: ");
+    eg1 parser = new eg1(System.in);
+    parser.Start();
+
+   }
+}
+
+PARSER_END(eg1)
+
+SKIP :
+{
+ < "//" ( ["a"-"z"] | ["A"-"Z"] | ["0"-"9"] )* ("\n") > // para comentários iniciados com //
+|  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : /* OPERATORS */
+{
+  < PLUS : "+" >
+| < MINUS : "-" >
+| < TIMES : "*" >
+| < LAND : "&&" >
+| < LE : "< " >
+| < NOT : "!" >
+}
+
+TOKEN :
+{
+  < INTEGER_LITERAL : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+| < STRING : "String" >
+| < CLASS : "class" >
+| < PUBLIC: "public" >
+| < STATIC : "static" >
+| < VOID : "void" >
+| < MAIN : "main" >
+| < EXTENDS : "extends" >
+| < RETURN : "return" >
+| < INT : "int" >
+| < BOOLEAN : "boolean" >
+| < IF : "if" >
+| < ELSE : "else" >
+| < WHILE : "while" >
+| < SYSOUT : "System.out.println" >
+| < LENGTH : "length" >
+| < TRUE : "true" >
+| < FALSE : "false" >
+| < THIS : "this" >
+| < NEW : "new" >
+| < LPAREN : "(" >
+| < RPAREN : ")" >
+| < SEMI : ";" >
+| < LKEY: "{" >
+| < RKEY: "}" >
+| < LBRACKET : "[" >
+| < RBRACKET : "]" >
+| < DOT : "." >
+| < COMMA: "," >
+| < GETS: "=" >
+| < ID : ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9"] )*>
+}
+
+
+int Program():
+{}
+{
+	MainClass() ( ClassDecl() )*
+	{
+	  return 1;
+	}
+	
+}
+
+void MainClass():
+{}
+{
+	< CLASS > < ID > < LKEY > < PUBLIC > < STATIC > < VOID > < MAIN > < LPAREN > < STRING > <LBRACKET > < RBRACKET>  < ID > < RPAREN > < LKEY> Statement() < RKEY> < RKEY>
+}
+
+void ClassDecl():
+{}
+{
+< CLASS > <ID> <LKEY> (VarDecl())* (MethodDecl())* <RKEY>
+}
+
+void MethodDecl():
+{}
+{
+	<PUBLIC> Type() <ID> <LPAREN> FormalList() <RPAREN> <LKEY> (VarDecl())* (Statement())* <RETURN> Exp() <SEMI> <RKEY>
+}
+
+void VarDecl():
+{}
+{
+	Type() < ID > < SEMI >
+}
+
+void Type():
+{}
+{
+   <BOOLEAN>
+ | LOOKAHEAD(1) < INT >
+ |< INT > < LBRACKET> < RBRACKET > 
+}
+
+void FormalList():
+{}
+{
+	(Type() < ID > (FormalRest())*)?
+}
+
+void FormalRest():
+{}
+{
+	< COMMA > Type() < ID >
+}
+
+void Statement():
+{}
+{
+ < LKEY > (Statement())* < RKEY >
+| < IF> <LPAREN > Exp() < RPAREN > Statement() < ELSE > Statement()
+|  < WHILE > <LPAREN > Exp() <RPAREN > Statement()
+| < SYSOUT > < LPAREN> Exp() < RPAREN >
+| LOOKAHEAD(1)
+< ID >  <GETS > Exp() < SEMI >
+| < ID > < LBRACKET> Exp() <RBRACKET> <GETS > Exp() < SEMI > 
+}
+
+void Start():
+{ }
+{
+  {
+	System.out.println("\tTry: S - > E");
+  }
+	Exp()
+	{
+		System.out.println("S - > E");
+	}
+}
+
+void Op():
+{
+	Token t;
+  }
+{
+
+	{System.out.println("\tTry: Op - > Plus");} t = < PLUS >{System.out.print("Op --> Plus");System.out.println("("+t+")");}
+| 	{System.out.println("\tTry: Op - > Minus");} t = < MINUS >{System.out.print("Op --> Minus");System.out.println("("+t+")");}
+|	{System.out.println("\tTry: Op - > Times");} t = < TIMES >{System.out.print("Op --> Times");System.out.println("("+t+")");}
+| 	{System.out.println("\tTry: Op -- > Land");}  t = <  LAND >{System.out.print("Op --> Land");System.out.println("("+t+")");}
+| 	{System.out.println("\tTry: Op -- > Less than");} t = < LE >{System.out.print("Op --> Less than");System.out.println("("+t+")");}
+}
+
+void T():
+{
+	Token t1;
+}
+{
+	{System.out.println("\tTry: T -- > TRUE");}t1 = <TRUE>{System.out.println("T --> TRUE("+t1+")");}
+| {System.out.println("\tTry: T -- > FALSE");}t1 = < FALSE >{System.out.println("T --> FALSE(" +t1 + ")");}
+| {System.out.println("\tTry: T -- > ID");}t1 = < ID >{System.out.println("T --> ID(" +t1 + ")");}	
+| {System.out.println("\tTry: T -- > THIS");}t1 = < THIS >{System.out.println("T --> THIS(" +t1 + ")");}
+| {System.out.println("\tTry: T -- > INTEGER_LITERAL");}t1 = < INTEGER_LITERAL >{System.out.println("T --> INTEGER_LITERAL(" +t1 + ")");}
+}
+
+void K():
+{}
+{
+    LOOKAHEAD(2) {System.out.println("\tTry: . id [ ExpList ]");} < DOT > < ID > < LPAREN> ExpList() < RPAREN>{System.out.println("K -- > . id [ ExpList ]");}
+| {System.out.println("\tTry: K --> ID (__)"); } < ID > < LPAREN > < RPAREN > [K()] {System.out.println("K --> ID (__)");}
+| {System.out.println("\tTry: K --> int [ E ]");} < INT > < LBRACKET > Exp() < RBRACKET >{System.out.println("K -- > int [ E ]");}
+| {System.out.println("\tTry: K -- > . length ");}< DOT > < LENGTH >{System.out.println("K -- > . length ");}
+}
+
+void R():
+{}
+{
+  {System.out.println("\tTry: R --> Op E"); } Op() Exp() {System.out.println("R - > Op E");}
+| {System.out.println("\tTry: R --> K"); } K() {System.out.println("R - > K");}
+| {System.out.println("\tTry: R -- > [E] L"); } < LBRACKET > Exp() < RBRACKET> [L()]  {System.out.println("R --> [ E ] L");}
+}
+
+void L():
+{}
+{
+	{System.out.println("\tTry:L -- > [E] L|vazio "); } < LBRACKET > Exp() < RBRACKET > [L()] {System.out.println("R - > K");}
+}
+
+
+void Exp():
+{}
+{	
+
+ {System.out.println("\tTry: E --> T R|vazio"); }  T() [R()] {System.out.println("Exp --> T R|vazio");}
+| {System.out.println("\tTry: E --> new K"); } < NEW > K(){System.out.println("E --> new K");}
+| {System.out.println("\tTry: E --> not E|Vazio"); } < NOT > Exp(){System.out.println("Exp --> not R|vazio");}
+| {System.out.println("\tTry: E --> ( E )"); } < LPAREN> Exp() < RPAREN> [R()]{System.out.println("Exp --> ( E )");}
+
+}
+
+
+void ExpRest():
+{}
+{
+	< COMMA > Exp() {System.out.println("ExpRest --> , E");}
+}
+
+void ExpList():
+{}
+{
+	 Exp() (ExpRest())* {System.out.println("ExpList --> E ExpRest*");}
+}
