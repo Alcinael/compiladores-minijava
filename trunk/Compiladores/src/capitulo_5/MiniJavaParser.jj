@@ -36,6 +36,7 @@ SKIP :
 | "\n"
 }
 
+
 TOKEN : /* OPERATORS */
 {
   < PLUS : "+" >
@@ -286,7 +287,8 @@ VarDecl VarDecl(Type t, Identifier i):{
 	)
 	(
 	  t1 = < ID >
-	  {	    
+	  {
+	    {System.out.println("VarDecl --> Type Id ; ");}
 	    i = new Identifier(t1.toString());
 	  }
 	) < SEMI >
@@ -319,15 +321,19 @@ Exp Exp():{
   Token t;
 }{	< BOOLEAN >
 	{
+	  {System.out.println("Type --> Boolean");}
 	  return new BooleanType();	}|
-	(	  t = < ID >
+	(
+	  {System.out.println("Type --> ID");}	  t = < ID >
 	)
 	{
 		return new IdentifierType(t.toString());	  	}| LOOKAHEAD(2) < INT >
 	{
+	  {System.out.println("Type --> INT_LITERAL");}
 		return new IntegerType();	}
 | < INT > < LBRACKET> < RBRACKET >
 	{
+	  {System.out.println("Type --> IntArrayType");}
 		return new IntArrayType();	}	}
 
 Exp T():{	Token t1;}{	{System.out.println("\tTry: T -- > TRUE");}
