@@ -1,0 +1,26 @@
+	Terminals:
+
+String
+id
+class
+public
+static
+void
+main
+extends
+return
+int
+boolean
+if
+else
+while
+System.out.println
+length
+true
+false
+this
+new
+
+	Productions:
+1. Program -> MainClass ClassDecl*.
+
