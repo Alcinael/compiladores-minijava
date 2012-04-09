@@ -10,7 +10,7 @@ public class MiniJavaParser implements MiniJavaParserConstants {
     try
     {
                 Program root = new MiniJavaParser(System.in).Goal();
-                System.out.println("A analise sintatica foi realizada com sucesso");
+                System.out.println("\n\nA analise sintatica foi realizada com sucesso\n\n");
                 root.accept(new PrettyPrintVisitor());
     }catch(ParseException e)
     {
