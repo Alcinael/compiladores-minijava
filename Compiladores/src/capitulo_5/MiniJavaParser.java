@@ -3,20 +3,25 @@ package capitulo_5;
 
 import syntaxtree.*;
 import visitor.*;
+import symbol.*;
 
 public class MiniJavaParser implements MiniJavaParserConstants {
+
   public static void main(String args []) throws ParseException
   {
-    try
-    {
+        Table identifiers = new Table();
+        try
+        {
                 Program root = new MiniJavaParser(System.in).Goal();
-                System.out.println("\n\nA analise sintatica foi realizada com sucesso\n\n");
+                System.out.println("A analise sintatica foi realizada com sucesso");
                 root.accept(new PrettyPrintVisitor());
-    }catch(ParseException e)
-    {
-        System.out.println(e.toString());
-    }
-   }
+                identifiers = root.identifiers();
+                identifiers.listar();
+        }catch(ParseException e)
+        {
+                System.out.println(e.toString());
+        }
+  }
 
   static final public Program Goal() throws ParseException {
         MainClass m = null;
@@ -27,6 +32,8 @@ public class MiniJavaParser implements MiniJavaParserConstants {
 
   static final public Program Program(MainClass m, ClassDeclList cl) throws ParseException {
   ClassDecl c;
+  VarDeclList vl = new VarDeclList();
+  MethodDeclList ml = new MethodDeclList();
     m = MainClass(null, null, null);
     label_1:
     while (true) {
@@ -38,7 +45,7 @@ public class MiniJavaParser implements MiniJavaParserConstants {
         jj_la1[0] = jj_gen;
         break label_1;
       }
-      c = ClassDecl(null, null, null);
+      c = ClassDecl(null, vl, ml);
             cl.addElement(c);
     }
                 {if (true) return new Program(m, cl);}
@@ -75,6 +82,10 @@ public class MiniJavaParser implements MiniJavaParserConstants {
   Token t, t1;
   VarDecl v;
   MethodDecl m;
+  StatementList sl1 = new StatementList(), sl2 = new StatementList();
+  VarDeclList vl1 = new VarDeclList(), vl2 = new VarDeclList();
+  vl1.addAll(vl);
+  vl2.addAll(vl);
     if (jj_2_1(3)) {
       jj_consume_token(CLASS);
       t = jj_consume_token(ID);
@@ -105,7 +116,7 @@ public class MiniJavaParser implements MiniJavaParserConstants {
           jj_la1[2] = jj_gen;
           break label_3;
         }
-        m = MethodDecl(null, null, null, null, null, null);
+        m = MethodDecl(null, null, null, vl1, sl1, null);
             ml.addElement(m);
       }
       jj_consume_token(RKEY);
@@ -145,7 +156,7 @@ public class MiniJavaParser implements MiniJavaParserConstants {
             jj_la1[4] = jj_gen;
             break label_5;
           }
-          m = MethodDecl(null, null, null, null, null, null);
+          m = MethodDecl(null, null, null, vl2, sl2, null);
             ml.addElement(m);
         }
         jj_consume_token(RKEY);
@@ -365,13 +376,13 @@ public class MiniJavaParser implements MiniJavaParserConstants {
       case LBRACKET:
       case DOT:
       case ID:
-        R(e);
+        e = R(e);
         break;
       default:
         jj_la1[11] = jj_gen;
         ;
       }
-            System.out.println("Exp --> T R|vazio");
+                System.out.println("Exp --> T R|vazio");
     {if (true) return e;}
       break;
     case NEW:
@@ -403,13 +414,13 @@ public class MiniJavaParser implements MiniJavaParserConstants {
       case LBRACKET:
       case DOT:
       case ID:
-        R(e);
+        e = R(e);
         break;
       default:
         jj_la1[12] = jj_gen;
         ;
       }
-                   System.out.println("Exp --> ( E )");
+                       System.out.println("Exp --> ( E )");
   {if (true) return e;}
       break;
     default:
@@ -435,14 +446,14 @@ public class MiniJavaParser implements MiniJavaParserConstants {
       jj_la1[14] = jj_gen;
       if (jj_2_4(2)) {
         jj_consume_token(INT);
-                {if (true) return new IntegerType();}
+        jj_consume_token(LBRACKET);
+        jj_consume_token(RBRACKET);
+                {if (true) return new IntArrayType();}
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case INT:
           jj_consume_token(INT);
-          jj_consume_token(LBRACKET);
-          jj_consume_token(RBRACKET);
-                {if (true) return new IntArrayType();}
+                {if (true) return new IntegerType();}
           break;
         default:
           jj_la1[15] = jj_gen;
@@ -512,20 +523,21 @@ public class MiniJavaParser implements MiniJavaParserConstants {
       case ID:
    System.out.println("\u005ctTry: K --> ID (__)");
         t = jj_consume_token(ID);
+    e = new IdentifierExp(t.toString());
         jj_consume_token(LPAREN);
         jj_consume_token(RPAREN);
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case INT:
         case DOT:
         case ID:
-          K(new IdentifierExp(t.toString()));
+          e = K(e);
           break;
         default:
           jj_la1[17] = jj_gen;
           ;
         }
-                                                              System.out.println("K --> ID (__)");
-  {if (true) return new IdentifierExp(t.toString());}
+                                    System.out.println("K --> ID (__)");
+  {if (true) return e;}
         break;
       case INT:
    System.out.println("\u005ctTry: K --> int [ E ]");
@@ -553,7 +565,7 @@ public class MiniJavaParser implements MiniJavaParserConstants {
   }
 
   static final public Exp R(Exp e) throws ParseException {
-  Exp e1 = null;
+  Exp e1 = null, resultado = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case PLUS:
     case MINUS:
@@ -561,18 +573,33 @@ public class MiniJavaParser implements MiniJavaParserConstants {
     case LAND:
     case LE:
    System.out.println("\u005ctTry: R --> Op E");
-      Op(e, e1);
+      resultado = Op(e, e1);
       e1 = Exp();
      System.out.println("R - > Op E");
-    {if (true) return Op(e, e1);}
+        if(resultado instanceof Plus)
+        {
+                {if (true) return new Plus(e, e1);}
+        }else if(resultado instanceof Minus)
+        {
+        {if (true) return new Minus(e, e1);}
+        }else if(resultado instanceof Times)
+        {
+                {if (true) return new Times(e, e1);}
+        }else if(resultado instanceof And)
+        {
+            {if (true) return new And(e, e1);}
+        }else
+        {
+                {if (true) return new LessThan(e, e1);}
+        }
       break;
     case INT:
     case DOT:
     case ID:
    System.out.println("\u005ctTry: R --> K");
-      e = K(null);
+      e1 = K(e);
      System.out.println("R - > K");
-    {if (true) return e;}
+    {if (true) return e1;}
       break;
     case LBRACKET:
    System.out.println("\u005ctTry: R -- > [E] L");
@@ -581,14 +608,14 @@ public class MiniJavaParser implements MiniJavaParserConstants {
       jj_consume_token(RBRACKET);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case LBRACKET:
-        L(e);
+        e = L(e);
         break;
       default:
         jj_la1[19] = jj_gen;
         ;
       }
-                        System.out.println("R --> [ E ] L");
-    {if (true) return new NewArray(e);}
+                            System.out.println("R --> [ E ] L");
+    {if (true) return new ArrayLookup(e, e1);}
       break;
     default:
       jj_la1[20] = jj_gen;
@@ -606,13 +633,13 @@ public class MiniJavaParser implements MiniJavaParserConstants {
     jj_consume_token(RBRACKET);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LBRACKET:
-      L(e);
+      e = L(e);
       break;
     default:
       jj_la1[21] = jj_gen;
       ;
     }
-                               System.out.println("R - > K");
+                                   System.out.println("R - > K");
           {if (true) return new ArrayLookup(e, e1);}
     throw new Error("Missing return statement in function");
   }
@@ -632,9 +659,9 @@ public class MiniJavaParser implements MiniJavaParserConstants {
         jj_la1[22] = jj_gen;
         break label_10;
       }
-      ExpRest(el);
+      el = ExpRest(el);
     }
-                          System.out.println("ExpList --> E ExpRest*");
+                               System.out.println("ExpList --> E ExpRest*");
           {if (true) return el;}
     throw new Error("Missing return statement in function");
   }
@@ -725,9 +752,38 @@ public class MiniJavaParser implements MiniJavaParserConstants {
     finally { jj_save(4, xla); }
   }
 
+  static private boolean jj_3_5() {
+    if (jj_scan_token(DOT)) return true;
+    if (jj_scan_token(ID)) return true;
+    return false;
+  }
+
+  static private boolean jj_3_3() {
+    if (jj_scan_token(ID)) return true;
+    if (jj_scan_token(GETS)) return true;
+    return false;
+  }
+
+  static private boolean jj_3_2() {
+    if (jj_3R_11()) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_11() {
+    if (jj_3R_12()) return true;
+    if (jj_scan_token(ID)) return true;
+    return false;
+  }
+
+  static private boolean jj_3_1() {
+    if (jj_scan_token(CLASS)) return true;
+    if (jj_scan_token(ID)) return true;
+    if (jj_scan_token(LKEY)) return true;
+    return false;
+  }
+
   static private boolean jj_3R_15() {
     if (jj_scan_token(INT)) return true;
-    if (jj_scan_token(LBRACKET)) return true;
     return false;
   }
 
@@ -738,6 +794,7 @@ public class MiniJavaParser implements MiniJavaParserConstants {
 
   static private boolean jj_3_4() {
     if (jj_scan_token(INT)) return true;
+    if (jj_scan_token(LBRACKET)) return true;
     return false;
   }
 
@@ -759,36 +816,6 @@ public class MiniJavaParser implements MiniJavaParserConstants {
 
   static private boolean jj_3R_13() {
     if (jj_scan_token(BOOLEAN)) return true;
-    return false;
-  }
-
-  static private boolean jj_3_3() {
-    if (jj_scan_token(ID)) return true;
-    if (jj_scan_token(GETS)) return true;
-    return false;
-  }
-
-  static private boolean jj_3_2() {
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  static private boolean jj_3_5() {
-    if (jj_scan_token(DOT)) return true;
-    if (jj_scan_token(ID)) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_11() {
-    if (jj_3R_12()) return true;
-    if (jj_scan_token(ID)) return true;
-    return false;
-  }
-
-  static private boolean jj_3_1() {
-    if (jj_scan_token(CLASS)) return true;
-    if (jj_scan_token(ID)) return true;
-    if (jj_scan_token(LKEY)) return true;
     return false;
   }
 

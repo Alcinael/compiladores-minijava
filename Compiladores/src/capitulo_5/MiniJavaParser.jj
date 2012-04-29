@@ -11,17 +11,23 @@ package capitulo_5;
 
 import syntaxtree.*;
 import visitor.*;
+import symbol.*;
 
 public class MiniJavaParser
 {
+  
   public static void main(String args []) throws ParseException
   {
-    try    {
+	Table identifiers = new Table();
+	try	{
 		Program root = new MiniJavaParser(System.in).Goal();
 		System.out.println("A analise sintatica foi realizada com sucesso");
-		root.accept(new PrettyPrintVisitor());          }catch(ParseException e)    {
-    	System.out.println(e.toString());     }
-   }
+		root.accept(new PrettyPrintVisitor());
+		identifiers = root.identifiers();
+		identifiers.listar();
+	}catch(ParseException e)	{
+		System.out.println(e.toString()); 	}
+  }
 }
 
 PARSER_END(MiniJavaParser)
@@ -35,7 +41,6 @@ SKIP :
 | "\t"
 | "\n"
 }
-
 
 TOKEN : /* OPERATORS */
 {
@@ -96,12 +101,14 @@ Program Goal():
 Program Program(MainClass m, ClassDeclList cl):
 {
   ClassDecl c;
+  VarDeclList vl = new VarDeclList();
+  MethodDeclList ml = new MethodDeclList();
 }
 {
 	(	  m = MainClass(null, null, null)
 	)
 	(
-	  c = ClassDecl(null, null, null)
+	  c = ClassDecl(null, vl, ml)
 	  {
 	    cl.addElement(c);  	  }
 	)*
@@ -126,6 +133,10 @@ Program Program(MainClass m, ClassDeclList cl):
   Token t, t1;
   VarDecl v;
   MethodDecl m;
+  StatementList sl1 = new StatementList(), sl2 = new StatementList();
+  VarDeclList vl1 = new VarDeclList(), vl2 = new VarDeclList();
+  vl1.addAll(vl);
+  vl2.addAll(vl);
 }{	LOOKAHEAD(3) < CLASS >
 	(
 	  t = <ID>
@@ -138,7 +149,7 @@ Program Program(MainClass m, ClassDeclList cl):
 	    vl.addElement(v);	  }
 	)*
 	(
-	  m = MethodDecl(null, null, null, null, null, null)
+	  m = MethodDecl(null, null, null, vl1, sl1, null)
 	  {
 	    ml.addElement(m);	  }
 	)* <RKEY>
@@ -159,7 +170,7 @@ Program Program(MainClass m, ClassDeclList cl):
 	    vl.addElement(v);	  }
 	)*
 	(
-	  m = MethodDecl(null, null, null, null, null, null)
+	  m = MethodDecl(null, null, null, vl2, sl2, null)
 	  {
 	    ml.addElement(m);	  }
 	)* <RKEY>
@@ -287,8 +298,7 @@ VarDecl VarDecl(Type t, Identifier i):{
 	)
 	(
 	  t1 = < ID >
-	  {
-	    {System.out.println("VarDecl --> Type Id ; ");}
+	  {	    
 	    i = new Identifier(t1.toString());
 	  }
 	) < SEMI >
@@ -299,7 +309,7 @@ Exp Exp():{
   Exp e;
 }{	  {System.out.println("\tTry: E --> T R|vazio"); }
   (    e = T()
-  ) [R(e)] {System.out.println("Exp --> T R|vazio");}
+  ) [e = R(e)] {System.out.println("Exp --> T R|vazio");}
   {
     return e;   }
 | {System.out.println("\tTry: E --> new K"); } < NEW >
@@ -313,7 +323,7 @@ Exp Exp():{
   return new Not(e);}
 | {System.out.println("\tTry: E --> ( E )"); } < LPAREN>
 (  e = Exp()
-) < RPAREN> [R(e)]{System.out.println("Exp --> ( E )");}
+) < RPAREN> [e = R(e)]{System.out.println("Exp --> ( E )");}
 {
   return e;}
 }
@@ -321,20 +331,17 @@ Exp Exp():{
   Token t;
 }{	< BOOLEAN >
 	{
-	  {System.out.println("Type --> Boolean");}
 	  return new BooleanType();	}|
-	(
-	  {System.out.println("Type --> ID");}	  t = < ID >
+	(	  t = < ID >
 	)
 	{
-		return new IdentifierType(t.toString());	  	}| LOOKAHEAD(2) < INT >
+		return new IdentifierType(t.toString());	  	}| LOOKAHEAD(2)
+    < INT > < LBRACKET> < RBRACKET >
 	{
-	  {System.out.println("Type --> INT_LITERAL");}
-		return new IntegerType();	}
-| < INT > < LBRACKET> < RBRACKET >
+		return new IntArrayType();
+	}|   < INT >
 	{
-	  {System.out.println("Type --> IntArrayType");}
-		return new IntArrayType();	}	}
+		return new IntegerType();	}}
 
 Exp T():{	Token t1;}{	{System.out.println("\tTry: T -- > TRUE");}
 	(
@@ -371,9 +378,11 @@ Exp T():{	Token t1;}{	{System.out.println("\tTry: T -- > TRUE");}
 | {System.out.println("\tTry: K --> ID (__)"); }
 (
   t = < ID >
-) < LPAREN > < RPAREN > [K(new IdentifierExp(t.toString()))] {System.out.println("K --> ID (__)");}
+  {
+    e = new IdentifierExp(t.toString());   }
+) < LPAREN > < RPAREN > [e = K(e)] {System.out.println("K --> ID (__)");}
 {
-  return new IdentifierExp(t.toString());}| {System.out.println("\tTry: K --> int [ E ]");} < INT > < LBRACKET >
+  return e;}| {System.out.println("\tTry: K --> int [ E ]");} < INT > < LBRACKET >
 (
   e = Exp()
 ) < RBRACKET >{System.out.println("K -- > int [ E ]");}{
@@ -381,21 +390,33 @@ Exp T():{	Token t1;}{	{System.out.println("\tTry: T -- > TRUE");}
 | {System.out.println("\tTry: K -- > . length ");}< DOT > < LENGTH >{System.out.println("K -- > . length ");}{
   return new ArrayLength(e);}
 }Exp R(Exp e):{
-  Exp e1 = null;
-}{  {System.out.println("\tTry: R --> Op E"); } Op(e, e1)
+  Exp e1 = null, resultado = null;
+}{
+  {System.out.println("\tTry: R --> Op E"); } resultado = Op(e, e1)
   (    e1 = Exp()
   ) {System.out.println("R - > Op E");}
   {
-    return Op(e, e1);  }
+	if(resultado instanceof Plus)
+  	{
+		return new Plus(e, e1);	}else if(resultado instanceof Minus)  	{
+    	return new Minus(e, e1);
+  	}else if(resultado instanceof Times)
+  	{  	  	
+  	  	return new Times(e, e1);  	}else if(resultado instanceof And)
+  	{
+  	    return new And(e, e1);  	}else
+  	{
+  	  	return new LessThan(e, e1);  	}
+  }
 | {System.out.println("\tTry: R --> K"); }
   (
-    e = K(null)
+    e1 = K(e)
   ) {System.out.println("R - > K");}  {
-    return e;   }
+    return e1;   }
 | {System.out.println("\tTry: R -- > [E] L"); } < LBRACKET >
   (    e1 = Exp()
-  ) < RBRACKET> [L(e)] {System.out.println("R --> [ E ] L");}  {
-    return new NewArray(e);  }
+  ) < RBRACKET> [e = L(e)] {System.out.println("R --> [ E ] L");}  {
+    return new ArrayLookup(e, e1);  }
 }
 
 ArrayLookup L(Exp e):
@@ -405,7 +426,7 @@ ArrayLookup L(Exp e):
 {
 	{System.out.println("\tTry:L -- > [E] L|vazio "); } < LBRACKET >
 	(	  e1 = Exp()
-	) < RBRACKET > [L(e)] {System.out.println("R - > K");}
+	) < RBRACKET > [e = L(e)] {System.out.println("R - > K");}
 	{
 	  return new ArrayLookup(e, e1);	}
 }
@@ -417,7 +438,7 @@ ExpList ExpList():{
 		{
 			el.addElement(e);
 		}
-	) (ExpRest(el))* {System.out.println("ExpList --> E ExpRest*");}
+	) (el = ExpRest(el))* {System.out.println("ExpList --> E ExpRest*");}
 	{
 	  return el;	}
 }
