@@ -2,6 +2,7 @@
 package capitulo_5;
 import syntaxtree.*;
 import visitor.*;
+import symbol.*;
 
 /** Token Manager. */
 public class MiniJavaParserTokenManager implements MiniJavaParserConstants
