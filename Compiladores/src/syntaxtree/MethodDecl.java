@@ -1,4 +1,6 @@
 package syntaxtree;
+import symbol.Symbol;
+import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
@@ -22,4 +24,17 @@ public class MethodDecl {
   public Type accept(TypeVisitor v) {
     return v.visit(this);
   }
+  
+  public Table identifiers(Table t) {
+	int cont = 0;
+	Symbol s = Symbol.symbol(i.toString());
+	t = t.put(s, s.toString());
+	while(cont < fl.size())
+	{		  
+	  t = this.fl.elementAt(cont).identifiers(t);		  
+	  cont++;
+	}
+	return t;
+  }
+  
 }

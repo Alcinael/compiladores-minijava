@@ -20,4 +20,9 @@ public class VarDeclList {
    public int size() { 
       return list.size(); 
    }
+
+   public boolean addAll(VarDeclList v) {
+	   return list.addAll(v.list);
+   }
+
 }
