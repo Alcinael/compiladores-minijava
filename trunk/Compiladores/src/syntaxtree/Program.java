@@ -1,5 +1,6 @@
 package syntaxtree;
 
+import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
@@ -18,4 +19,18 @@ public class Program {
   public Type accept(TypeVisitor v) {
     return v.visit(this);
   }
+  
+  public Table identifiers()
+  {
+	  int cont = 0;
+	  Table t;
+	  t = this.m.identifiers();
+	  while(cont < cl.size())
+	  {		  
+		  t = this.cl.elementAt(cont).identifiers(t);		  
+		  cont++;
+	  }
+	  return t;
+  }
+  
 }
