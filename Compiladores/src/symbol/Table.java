@@ -45,6 +45,7 @@ public class Table {
 				System.out.print(", ");
 			}
 		}
+		System.out.println();
 	}
 	
 
