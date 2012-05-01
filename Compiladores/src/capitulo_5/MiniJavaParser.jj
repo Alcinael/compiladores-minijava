@@ -25,6 +25,8 @@ public class MiniJavaParser
 		root.accept(new PrettyPrintVisitor());
 		identifiers = root.identifiers();
 		identifiers.listar();
+		System.out.println("\nErros:");
+		root.accept(new TypeCheckingVisitor());
 	}catch(ParseException e)	{
 		System.out.println(e.toString()); 	}
   }
@@ -247,12 +249,15 @@ Statement Statement():{
 	StatementList sl = new StatementList();
 }{< LKEY >
 (
-  s1 = Statement()
-  {
-    sl.addElement(s1);    }
-  {
-    return new Block(sl);  }
-)* < RKEY >
+	s1 = Statement()
+	{
+    	sl.addElement(s1);
+	}
+) (sl = StatementRest(sl))*
+{
+  return new Block(sl);
+}
+< RKEY >
 | < IF> <LPAREN >
 (  e1 = Exp()
 ) < RPAREN >
@@ -292,6 +297,20 @@ Statement Statement():{
 {
 	return new ArrayAssign(i, e1, e2);}}
 
+StatementList StatementRest(StatementList sl):
+{
+  Statement s;
+}
+{
+	(s = Statement())
+	{
+	  sl.addElement(s);
+	}
+	{
+	  return sl;
+	}
+}
+
 VarDecl VarDecl(Type t, Identifier i):{
   Token t1;
 }{	(	  t = Type()
@@ -307,16 +326,18 @@ VarDecl VarDecl(Type t, Identifier i):{
 
 Exp Exp():{
   Exp e;
-}{	  {System.out.println("\tTry: E --> T R|vazio"); }
+}{
+  {System.out.println("\tTry: E --> new K"); } < NEW >
+  (
+    e = K(null)
+  ){System.out.println("E --> new K");}
+  {
+    return e;
+  }  	| {System.out.println("\tTry: E --> T R|vazio"); }
   (    e = T()
   ) [e = R(e)] {System.out.println("Exp --> T R|vazio");}
   {
     return e;   }
-| {System.out.println("\tTry: E --> new K"); } < NEW >
-(  e = K(null)
-){System.out.println("E --> new K");}
-{
-  return e;}
 | {System.out.println("\tTry: E --> not E"); } < NOT >
 (  e = Exp()
 ){System.out.println("Exp --> not E");}{
@@ -379,7 +400,7 @@ Exp T():{	Token t1;}{	{System.out.println("\tTry: T -- > TRUE");}
 (
   t = < ID >
   {
-    e = new IdentifierExp(t.toString());   }
+    e = new NewObject(new Identifier(t.toString()));   }
 ) < LPAREN > < RPAREN > [e = K(e)] {System.out.println("K --> ID (__)");}
 {
   return e;}| {System.out.println("\tTry: K --> int [ E ]");} < INT > < LBRACKET >
