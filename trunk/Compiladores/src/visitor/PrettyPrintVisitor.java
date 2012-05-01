@@ -25,7 +25,7 @@ public class PrettyPrintVisitor implements Visitor {
     System.out.println(") {");
     System.out.print("    ");
     n.s.accept(this);
-    System.out.println("  }");
+    System.out.println("\n  }");
     System.out.println("}");
   }
 
@@ -124,7 +124,7 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   public void visit(IntArrayType n) {
-    System.out.print("int []");
+    System.out.print("int[]");
   }
 
   public void visit(BooleanType n) {
@@ -157,11 +157,15 @@ public class PrettyPrintVisitor implements Visitor {
     System.out.print("if (");
     n.e.accept(this);
     System.out.println(") ");
-    System.out.print("    ");
+    System.out.println("    {");
+    System.out.print("      ");
     n.s1.accept(this);
-    System.out.println();
-    System.out.print("    else ");
+    System.out.println("    }");
+    System.out.println("    else ");
+    System.out.println("    {");
+    System.out.print("      ");
     n.s2.accept(this);
+    System.out.println("    }");
   }
 
   // Exp e;
@@ -169,15 +173,18 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(While n) {
     System.out.print("while (");
     n.e.accept(this);
-    System.out.print(") ");
+    System.out.println(")");
+    System.out.println("    {");
+    System.out.print("      ");
     n.s.accept(this);
+    System.out.println("    }");
   }
 
   // Exp e;
   public void visit(Print n) {
     System.out.print("System.out.println(");
     n.e.accept(this);
-    System.out.println(");");
+    System.out.print(");");
   }
   
   // Identifier i;
@@ -186,7 +193,7 @@ public class PrettyPrintVisitor implements Visitor {
     n.i.accept(this);
     System.out.print(" = ");
     n.e.accept(this);
-    System.out.println(";");
+    System.out.print(";");
   }
 
   // Identifier i;
