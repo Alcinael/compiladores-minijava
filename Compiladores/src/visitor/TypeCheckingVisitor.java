@@ -41,8 +41,10 @@ public class TypeCheckingVisitor implements TypeVisitor {
 
 	@Override
 	public Type visit(Program n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.m.accept(this) instanceof IdentifierType) )
+		t = n.m.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("First term of Program must be of type MainClass");
 		}
@@ -52,13 +54,15 @@ public class TypeCheckingVisitor implements TypeVisitor {
 				error.complain("Class must be of type identifier");
 			}
 		}
-		return n.m.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(MainClass n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i1.accept(this) instanceof IdentifierType) )
+		t1 = n.i1.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 		{
 			error.complain("First term of MainClass must be of type identifier");
 		}
@@ -66,20 +70,20 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Second term of MainClass must be of type identifier");
 		}
-		if(! (n.s.accept(this) instanceof BooleanType ||
-			  n.s.accept(this) instanceof IntegerType ||
-			  n.s.accept(this) instanceof IdentifierType ||
-			  n.s.accept(this) instanceof IntArrayType) )
+		t = n.s.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType || t instanceof IntArrayType) )
 		{
 			error.complain("Third term of MainClass must be of type boolean or integer or identifier or array of integers");
 		}
-		return n.i1.accept(this);
+		return t1;
 	}
 
 	@Override
 	public Type visit(ClassDeclSimple n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t = n.i.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("First term of Class must be of type identifier");
 		}
@@ -95,13 +99,15 @@ public class TypeCheckingVisitor implements TypeVisitor {
 				error.complain("Third term of Class must be of type identifier");
 			}
 		}
-		return n.i.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(ClassDeclExtends n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t = n.i.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("First term of Class must be of type identifier");
 		}
@@ -121,37 +127,37 @@ public class TypeCheckingVisitor implements TypeVisitor {
 				error.complain("Fourth term of Class must be of type identifier");
 			}
 		}
-		return n.i.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(VarDecl n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.t.accept(this) instanceof IntArrayType ||
-			  n.t.accept(this) instanceof BooleanType ||
-			  n.t.accept(this) instanceof IntegerType ||
-			  n.t.accept(this) instanceof IdentifierType) )
+		t = n.t.accept(this);
+		if(! (t instanceof IntArrayType || t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("First term of Declaration of the Variable must be of type array of integers or boolean or integer or identifier");
 		}
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t1 = n.i.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 			{
 				error.complain("Second term of Declaration of the Variable must be of type identifier");
 			}
-		return n.i.accept(this);
+		return t1;
 	}
 
 	@Override
 	public Type visit(MethodDecl n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.t.accept(this) instanceof IntArrayType ||
-			  n.t.accept(this) instanceof BooleanType ||
-			  n.t.accept(this) instanceof IntegerType ||
-			  n.t.accept(this) instanceof IdentifierType) )
+		t = n.t.accept(this);
+		if(! (t instanceof IntArrayType || t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("First term of Declaration of the Method must be of type array of integers or boolean or integer or identifier");
 		}
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t1 = n.i.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 		{
 			error.complain("Second term of Declaration of the Method must be of type identifier");
 		}
@@ -162,45 +168,42 @@ public class TypeCheckingVisitor implements TypeVisitor {
 			}
 		}
 		for ( int i = 0; i < n.vl.size(); i++ ) {
-			if(! (n.vl.elementAt(i).accept(this) instanceof BooleanType ||
-				  n.vl.elementAt(i).accept(this) instanceof IntegerType ||
-				  n.vl.elementAt(i).accept(this) instanceof IdentifierType) )
+			t = n.vl.elementAt(i).accept(this);
+			if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 			{
 				error.complain("Fourth term of Declaration of the Method must be of type identifier");
 			}
 		}
 		for ( int i = 0; i < n.sl.size(); i++ ) {
-			if(! (n.sl.elementAt(i).accept(this) instanceof BooleanType ||
-				  n.sl.elementAt(i).accept(this) instanceof IntegerType ||
-				  n.sl.elementAt(i).accept(this) instanceof IdentifierType) )
+			t = n.sl.elementAt(i).accept(this);
+			if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 			{
 				error.complain("Fifth term of Declaration of the Method must be of type identifier");
 			}
 		}
-		if(! (n.e.accept(this) instanceof BooleanType ||
-			  n.e.accept(this) instanceof IntegerType ||
-			  n.e.accept(this) instanceof IdentifierType) )
+		t = n.e.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("Sixth term of Declaration of the Method must be of type boolean or integer or identifier");
 		}
-		return n.i.accept(this);
+		return t1;
 	}
 
 	@Override
 	public Type visit(Formal n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.t.accept(this) instanceof IntArrayType ||
-			  n.t.accept(this) instanceof BooleanType ||
-			  n.t.accept(this) instanceof IntegerType ||
-			  n.t.accept(this) instanceof IdentifierType) )
+		t = n.t.accept(this);
+		if(! (t instanceof IntArrayType || t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("First term of Formal must be of type array of integers or boolean or integer or identifier");
 		}
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t1 = n.i.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 		{
 			error.complain("Second term of Formal must be of type identifier");
 		}
-		return n.i.accept(this);
+		return t1;
 	}
 
 	@Override
@@ -245,89 +248,92 @@ public class TypeCheckingVisitor implements TypeVisitor {
 
 	@Override
 	public Type visit(Block n) {
+		Type t = null;
 		ErrorMsg error = new ErrorMsg();
 		for ( int i = 0; i < n.sl.size(); i++ ) {
-			if(! (n.sl.elementAt(i).accept(this) instanceof IntegerType ||
-				  n.sl.elementAt(i).accept(this) instanceof BooleanType ||
-				  n.sl.elementAt(i).accept(this) instanceof IdentifierType) )
+			t = n.sl.elementAt(i).accept(this);
+			if(! (t instanceof IntegerType || t instanceof BooleanType || t instanceof IdentifierType) )
 			{
 				error.complain("Exp must be of type integer or boolean or identifier");
 			}
 		}
-		return n.sl.elementAt(0).accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(If n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof BooleanType) )
+		t1 = n.e.accept(this);
+		if(! (t1 instanceof BooleanType) )
 		{
 			error.complain("Exp must be of type boolean");
 		}
-		if(! (n.s1.accept(this) instanceof BooleanType ||
-			  n.s1.accept(this) instanceof IntegerType ||
-			  n.s1.accept(this) instanceof IdentifierType) )
+		t = n.s1.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("Statement must be of type boolean or integer or identifier");
 		}
-		if(! (n.s2.accept(this) instanceof BooleanType ||
-			  n.s2.accept(this) instanceof IntegerType ||
-			  n.s2.accept(this) instanceof IdentifierType) )
+		t = n.s2.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("Statement must be of type boolean or integer or identifier");
 		}		
-		return n.e.accept(this);
+		return t1;
 	}
 
 	@Override
 	public Type visit(While n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof BooleanType) )
+		t1 = n.e.accept(this);
+		if(! (t1 instanceof BooleanType || t1 instanceof IntegerType || t1 instanceof IdentifierType) )
 		{
 			error.complain("Exp must be of type boolean or integer or identifier");
 		}
-		if(! (n.s.accept(this) instanceof BooleanType ||
-			  n.s.accept(this) instanceof IntegerType ||
-			  n.s.accept(this) instanceof IdentifierType) )
+		t = n.s.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("Statement must be of type boolean or integer or identifier");
 		}
-		return n.e.accept(this);
+		return t1;
 	}
 
 	@Override
 	public Type visit(Print n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof BooleanType ||
-			  n.e.accept(this) instanceof IntegerType ||
-			  n.e.accept(this) instanceof IdentifierType) )
+		t = n.e.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("Exp must be of type boolean or integer or identifier");
 		}
-		return n.e.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(Assign n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t1 = n.i.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 		{
 			error.complain("Left side of Assign must be of type identifier");
 		}
-		if(! (n.e.accept(this) instanceof BooleanType ||
-			  n.e.accept(this) instanceof IntegerType ||
-			  n.e.accept(this) instanceof IdentifierType ||
-			  n.e.accept(this) instanceof IntArrayType) )
+		t = n.e.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType || t instanceof IntArrayType) )
 		{
 			error.complain("Right side of Assign must be of type boolean or integer or identifier or array of integers");
 		}
-		return n.i.accept(this);
+		return t1;
 	}
 
 	@Override
 	public Type visit(ArrayAssign n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t1 = n.i.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 		{
 			error.complain("First term of Array Assign must be of type identifier");
 		}
@@ -335,13 +341,12 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Second term of Array Assign must be of type integer");
 		}
-		if(! (n.e2.accept(this) instanceof BooleanType ||
-			  n.e2.accept(this) instanceof IntegerType ||
-			  n.e2.accept(this) instanceof IdentifierType) )
+		t = n.e2.accept(this);
+		if(! (t instanceof BooleanType || t instanceof IntegerType || t instanceof IdentifierType) )
 		{
 			error.complain("Third term of Array Assign must be of type boolean or integer or identifier");
 		}
-		return n.i.accept(this);	
+		return t1;	
 	}
 
 	@Override
@@ -349,13 +354,13 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		ErrorMsg error = new ErrorMsg();
 		if(! (n.e1.accept(this) instanceof BooleanType) )
 		{
-			error.complain("Left side of Plus must be of type boolean");
+			error.complain("Left side of And must be of type boolean");
 		}
 		if(! (n.e2.accept(this) instanceof BooleanType) )
 		{
-			error.complain("Right side of Plus must be of type boolean");
+			error.complain("Right side of And must be of type boolean");
 		}
-		return n.e1.accept(this);
+		return new BooleanType();
 	}
 
 	@Override
@@ -369,13 +374,15 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Right side of LessThan must be of type integer");
 		}
-		return n.e1.accept(this);
+		return new BooleanType();
 	}
 
 	@Override
 	public Type visit(Plus n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e1.accept(this) instanceof IntegerType) )
+		t = n.e1.accept(this);
+		if(! (t instanceof IntegerType) )
 		{
 			error.complain("Left side of Plus must be of type integer");
 		}
@@ -383,13 +390,15 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Right side of Plus must be of type integer");
 		}
-		return n.e1.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(Minus n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e1.accept(this) instanceof IntegerType) )
+		t = n.e1.accept(this);
+		if(! (t instanceof IntegerType) )
 		{
 			error.complain("Left side of Plus must be of type integer");
 		}
@@ -397,13 +406,15 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Right side of Plus must be of type integer");
 		}
-		return n.e1.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(Times n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e1.accept(this) instanceof IntegerType) )
+		t = n.e1.accept(this);
+		if(! (t instanceof IntegerType) )
 		{
 			error.complain("Left side of Plus must be of type integer");
 		}
@@ -411,13 +422,15 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Right side of Plus must be of type integer");
 		}
-		return n.e1.accept(this);	
+		return t;	
 	}
 
 	@Override
 	public Type visit(ArrayLookup n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e1.accept(this) instanceof IdentifierType) )
+		t = n.e1.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("Exp must be of type identifier");
 		}
@@ -425,23 +438,27 @@ public class TypeCheckingVisitor implements TypeVisitor {
 		{
 			error.complain("Exp must be of type integer");
 		}
-		return n.e1.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(ArrayLength n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof IdentifierType) )
+		t = n.e.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("Exp must be of type identifier");
 		}
-		return n.e.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(Call n) {
+		Type t, t1;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof IdentifierType) )
+		t1 = n.e.accept(this);
+		if(! (t1 instanceof IdentifierType) )
 		{
 			error.complain("Class must be of type identifier");
 		}
@@ -450,14 +467,13 @@ public class TypeCheckingVisitor implements TypeVisitor {
 			error.complain("Method must be of type identifier");
 		}
 		for ( int i = 0; i < n.el.size(); i++ ) {
-			if(! (n.el.elementAt(i).accept(this) instanceof IntegerType ||
-				  n.el.elementAt(i).accept(this) instanceof BooleanType ||
-				  n.el.elementAt(i).accept(this) instanceof IdentifierType) )
+			t = n.el.elementAt(i).accept(this);
+			if(! (t instanceof IntegerType || t instanceof BooleanType || t instanceof IdentifierType) )
 			{
 				error.complain("Exp must be of type integer or boolean or identifier or array of the int");
 			}
 		}
-		return n.e.accept(this);
+		return t1;
 	}
 
 	@Override
@@ -502,42 +518,50 @@ public class TypeCheckingVisitor implements TypeVisitor {
 
 	@Override
 	public Type visit(This n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t = n.i.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("Exp must be of type this");
 		}
-		return n.i.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(NewArray n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof IntegerType) )
+		t = n.e.accept(this);
+		if(! (t instanceof IntegerType || t instanceof IdentifierType) )
 		{
-			error.complain("Exp must be of type integer");
+			error.complain("Exp must be of type integer or identifier");
 		}
-		return n.e.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(NewObject n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.i.accept(this) instanceof IdentifierType) )
+		t = n.i.accept(this);
+		if(! (t instanceof IdentifierType) )
 		{
 			error.complain("Exp must be of type identifier");
 		}
-		return n.i.accept(this);
+		return t;
 	}
 
 	@Override
 	public Type visit(Not n) {
+		Type t;
 		ErrorMsg error = new ErrorMsg();
-		if(! (n.e.accept(this) instanceof BooleanType) )
+		t = n.e.accept(this);
+		if(! (t instanceof BooleanType) )
 		{
 			error.complain("Exp must be of type boolean");
 		}
-		return n.e.accept(this);
+		return t;
 	}
 
 	@Override

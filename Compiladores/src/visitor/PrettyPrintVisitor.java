@@ -9,7 +9,6 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(Program n) {
     n.m.accept(this);
     for ( int i = 0; i < n.cl.size(); i++ ) {
-        System.out.println();
         n.cl.elementAt(i).accept(this);
     }
   }
@@ -20,13 +19,16 @@ public class PrettyPrintVisitor implements Visitor {
     System.out.print("class ");
     n.i1.accept(this);
     System.out.println(" {");
-    System.out.print("  public static void main (String [] ");
+    System.out.println();
+    System.out.print("  public static void main (String[] ");
     n.i2.accept(this);
     System.out.println(") {");
     System.out.print("    ");
     n.s.accept(this);
     System.out.println("\n  }");
+    System.out.println();
     System.out.println("}");
+    System.out.println();
   }
 
   // Identifier i;
@@ -39,11 +41,11 @@ public class PrettyPrintVisitor implements Visitor {
     for ( int i = 0; i < n.vl.size(); i++ ) {
         System.out.print("  ");
         n.vl.elementAt(i).accept(this);
-        if ( i+1 < n.vl.size() ) { System.out.println(); }
+        if ( i < n.vl.size() ) { System.out.println(); }
     }
     for ( int i = 0; i < n.ml.size(); i++ ) {
         System.out.println();
-        n.ml.elementAt(i).accept(this);
+    	n.ml.elementAt(i).accept(this);
     }
     System.out.println();
     System.out.println("}");
@@ -64,7 +66,6 @@ public class PrettyPrintVisitor implements Visitor {
         n.vl.elementAt(i).accept(this);
         if ( i+1 < n.vl.size() ) { System.out.println(); }
     }
-//    System.out.println();
     for ( int i = 0; i < n.ml.size(); i++ ) {
         System.out.println();
         n.ml.elementAt(i).accept(this);
@@ -107,12 +108,12 @@ public class PrettyPrintVisitor implements Visitor {
     for ( int i = 0; i < n.sl.size(); i++ ) {
         System.out.print("    ");
         n.sl.elementAt(i).accept(this);
-        if ( i < n.sl.size() ) { System.out.print(""); }
+        if ( i < n.sl.size() ) { System.out.println(""); }
     }
     System.out.print("    return ");
     n.e.accept(this);
     System.out.println(";");
-    System.out.print("  }");
+    System.out.println("  }");
   }
 
   // Type t;
@@ -160,12 +161,12 @@ public class PrettyPrintVisitor implements Visitor {
     System.out.println("    {");
     System.out.print("      ");
     n.s1.accept(this);
-    System.out.println("    }");
+    System.out.println("\n    }");
     System.out.println("    else ");
     System.out.println("    {");
     System.out.print("      ");
     n.s2.accept(this);
-    System.out.println("    }");
+    System.out.print("\n    }");
   }
 
   // Exp e;
@@ -177,7 +178,7 @@ public class PrettyPrintVisitor implements Visitor {
     System.out.println("    {");
     System.out.print("      ");
     n.s.accept(this);
-    System.out.println("    }");
+    System.out.print("\n    }");
   }
 
   // Exp e;
