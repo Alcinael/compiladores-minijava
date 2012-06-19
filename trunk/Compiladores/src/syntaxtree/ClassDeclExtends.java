@@ -26,21 +26,44 @@ public class ClassDeclExtends extends ClassDecl {
   @Override
   public Table identifiers(Table t) {
 	  int cont = 0;
-	  Symbol s = Symbol.symbol(i.toString());
-	  t = t.put(s, s.toString());		
-	  Symbol s1 = Symbol.symbol(j.toString());
-	  t = t.put(s1, s1.toString());
+	  this.i.identifiers(t);
+	  if(Symbol.getSymbol(j.toString()) == null)
+	  {
+		System.out.println("O identificador " + j.toString() + " nao foi declarado");
+	  }else
+	  {
+		  if(Symbol.getSymbol(j.toString()) != null)
+		  {
+			  if(j.toString().equals(i.toString()))
+			  {
+				  System.out.println("A classe nao pode herdar dela propria");
+			  }
+		  }
+	  }
 	  while(cont < vl.size())
 	  {		  
-		t = this.vl.elementAt(cont).identifiers(t);		  
+		this.vl.elementAt(cont).identifiers(t);		  
 		cont++;
 	  }
 	  cont = 0;
 	  while(cont < ml.size())
 	  {		  
-		t = this.ml.elementAt(cont).identifiers(t);		  
+		this.ml.elementAt(cont).identifiers(t);		  
 		cont++;
-	  }	  
+	  }
+  	  // Remover Identificadores
+	  cont = 0;
+	  while(cont < vl.size())
+	  {
+	    this.vl.elementAt(cont).removeIdentifiers(t);
+	    cont++;
+	  }
+	  cont = 0;
+	  while(cont < ml.size())
+	  {
+  	    this.ml.elementAt(cont).i.removeIdentifiers(t);
+	    cont++;
+	  }
 	  return t;
-  }
+    }
 }
