@@ -1,5 +1,4 @@
 package syntaxtree;
-import symbol.Symbol;
 import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
@@ -27,13 +26,46 @@ public class MethodDecl {
   
   public Table identifiers(Table t) {
 	int cont = 0;
-	Symbol s = Symbol.symbol(i.toString());
-	t = t.put(s, s.toString());
+	// Incluir Identificadores
+	this.i.identifiers(t);
 	while(cont < fl.size())
-	{		  
-	  t = this.fl.elementAt(cont).identifiers(t);		  
+	{
+	  this.fl.elementAt(cont).identifiers(t);		  
 	  cont++;
 	}
+	cont = 0;
+	while(cont < vl.size())
+	{		  
+	  this.vl.elementAt(cont).identifiers(t);		  
+	  cont++;
+	}
+	cont = 0;
+	while(cont < sl.size())
+	{		  
+	  this.sl.elementAt(cont).identifiers(t);	  
+	  cont++;
+	}
+	this.e.identifiers(t);
+	// Remover Identificadores
+	cont = 0;
+	while(cont < fl.size())
+	{
+	  this.fl.elementAt(cont).removeIdentifiers(t);		  
+	  cont++;
+	}
+	cont = 0;
+	while(cont < vl.size())
+	{		  
+	  this.vl.elementAt(cont).removeIdentifiers(t);		  
+	  cont++;
+	}
+	cont = 0;
+	while(cont < sl.size())
+	{		  
+	  this.sl.elementAt(cont).removeIdentifiers(t);	  
+	  cont++;
+	}
+	this.e.removeIdentifiers(t);
 	return t;
   }
   

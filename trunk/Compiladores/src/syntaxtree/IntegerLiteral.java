@@ -1,4 +1,5 @@
 package syntaxtree;
+import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
@@ -15,5 +16,15 @@ public class IntegerLiteral extends Exp {
 
   public Type accept(TypeVisitor v) {
     return v.visit(this);
+  }
+
+  @Override
+  public Table identifiers(Table t) {
+	return t;
+  }
+
+  @Override
+  public Table removeIdentifiers(Table t) {
+	return t;
   }
 }

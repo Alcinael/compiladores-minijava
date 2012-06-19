@@ -1,4 +1,5 @@
 package syntaxtree;
+import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
@@ -17,4 +18,21 @@ public class If extends Statement {
   public Type accept(TypeVisitor v) {
     return v.visit(this);
   }
+
+  @Override
+  public Table identifiers(Table t) {
+	this.e.identifiers(t);
+	this.s1.identifiers(t);
+	this.s2.identifiers(t);
+	return t;
+  }
+
+  @Override
+  public Table removeIdentifiers(Table t) {
+	this.e.removeIdentifiers(t);
+	this.s1.removeIdentifiers(t);
+	this.s2.removeIdentifiers(t);
+	return t;
+  }
+
 }
