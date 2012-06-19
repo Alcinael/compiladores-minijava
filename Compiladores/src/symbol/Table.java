@@ -18,6 +18,12 @@ public class Table {
 		keys = symbol.copiar(keys);
 		return this;
 	}
+
+	public Table remove(Object value)
+	{
+		Symbol.removeSymbol(String.valueOf(value));
+		return this;
+	}
 	
 	public Object get(Symbol key)
 	{
