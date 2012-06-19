@@ -27,7 +27,8 @@ public class Program {
 	  t = this.m.identifiers();
 	  while(cont < cl.size())
 	  {		  
-		  t = this.cl.elementAt(cont).identifiers(t);		  
+		  t.listar();
+		  this.cl.elementAt(cont).identifiers(t);
 		  cont++;
 	  }
 	  return t;
