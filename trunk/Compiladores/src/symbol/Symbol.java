@@ -35,5 +35,23 @@ public class Symbol {
 		}
 		return s;
 	}
+
+	public static Symbol removeSymbol(String n)
+	{
+		String u = n.intern();
+		Symbol s = (Symbol) dict.get(u);
+		if(s != null)
+		{
+			dict.remove(u);
+		}
+		return s;
+	}
+	
+	public static Symbol getSymbol(String n)
+	{
+		String u = n.intern();
+		Symbol s = (Symbol) dict.get(u);
+		return s;
+	}
 	
 }
