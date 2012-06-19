@@ -23,9 +23,9 @@ public class MiniJavaParser
 		Program root = new MiniJavaParser(System.in).Goal();
 		System.out.println("A analise sintatica foi realizada com sucesso");
 		root.accept(new PrettyPrintVisitor());
+		System.out.println("\nErros:");
 		identifiers = root.identifiers();
 		identifiers.listar();
-		System.out.println("\nErros:");
 		root.accept(new TypeCheckingVisitor());
 	}catch(ParseException e)	{
 		System.out.println(e.toString()); 	}
@@ -103,14 +103,18 @@ Program Goal():
 Program Program(MainClass m, ClassDeclList cl):
 {
   ClassDecl c;
-  VarDeclList vl = new VarDeclList();
-  MethodDeclList ml = new MethodDeclList();
+  VarDeclList vl;
+  MethodDeclList ml;
 }
 {
 	(	  m = MainClass(null, null, null)
 	)
 	(
-	  c = ClassDecl(null, vl, ml)
+	  {
+		  vl = new VarDeclList();
+	      ml = new MethodDeclList();
+	  }
+  	  c = ClassDecl(null, vl, ml)
 	  {
 	    cl.addElement(c);  	  }
 	)*
@@ -151,6 +155,10 @@ Program Program(MainClass m, ClassDeclList cl):
 	    vl.addElement(v);	  }
 	)*
 	(
+	  {
+		  vl1 = new VarDeclList();
+	      sl1 = new StatementList();
+	  }
 	  m = MethodDecl(null, null, null, vl1, sl1, null)
 	  {
 	    ml.addElement(m);	  }
@@ -172,6 +180,10 @@ Program Program(MainClass m, ClassDeclList cl):
 	    vl.addElement(v);	  }
 	)*
 	(
+	  {
+		  vl2 = new VarDeclList();
+	      sl2 = new StatementList();
+	  }
 	  m = MethodDecl(null, null, null, vl2, sl2, null)
 	  {
 	    ml.addElement(m);	  }
@@ -254,10 +266,10 @@ Statement Statement():{
     	sl.addElement(s1);
 	}
 ) (sl = StatementRest(sl))*
+< RKEY >
 {
   return new Block(sl);
 }
-< RKEY >
 | < IF> <LPAREN >
 (  e1 = Exp()
 ) < RPAREN >
