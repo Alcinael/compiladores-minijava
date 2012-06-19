@@ -22,7 +22,13 @@ public class VarDecl {
   
   public Table identifiers(Table t) {
 	Symbol s = Symbol.symbol(i.toString());
-	t = t.put(s, s.toString());		
+	t.put(s, s.toString());		
 	return t;
   }
+  
+  public Table removeIdentifiers(Table t) {
+	this.i.removeIdentifiers(t);
+	return t;
+  }
+  
 }
