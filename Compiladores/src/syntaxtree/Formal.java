@@ -1,5 +1,4 @@
 package syntaxtree;
-import symbol.Symbol;
 import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
@@ -21,8 +20,13 @@ public class Formal {
   }
 
   public Table identifiers(Table t) {
-	Symbol s = Symbol.symbol(i.toString());
-	t = t.put(s, s.toString());
+	this.i.identifiers(t);
 	return t;
   }
+  
+  public Table removeIdentifiers(Table t) {
+	this.i.removeIdentifiers(t);
+	return t;
+  }
+  
 }
