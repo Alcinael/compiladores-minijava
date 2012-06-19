@@ -1,6 +1,5 @@
 package syntaxtree;
 
-import symbol.Symbol;
 import symbol.Table;
 import visitor.Visitor;
 import visitor.TypeVisitor;
@@ -23,10 +22,13 @@ public class MainClass {
 
   public Table identifiers() {
 	Table t = new Table();
-	Symbol s = Symbol.symbol(i1.toString());
-	t = t.put(s, s.toString());
-	Symbol s1 = Symbol.symbol(i2.toString());
-	t = t.put(s1, s1.toString());
+	// Incluir Identificadores
+	this.i1.identifiers(t);
+	this.i2.identifiers(t);
+	this.s.identifiers(t);
+	// Remover Identificadores
+	this.i2.removeIdentifiers(t);
+	this.s.removeIdentifiers(t);
 	return t;
   }
 }
